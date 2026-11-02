@@ -1,0 +1,15 @@
+[
+    {
+        "id": 2,
+        "title": "Chemistry Lab Coat (Size L)",
+        "category": "Lab Coat",
+        "price": 200,
+        "desc": "Clean, washed, and no chemical stains. Ready for labs.",
+        "location": "College Canteen",
+        "contact": "9876543210",
+        "timestamp": 1690000050000,
+        "ownerId": "rahul.tech@mckvie.edu.in",
+        "ownerAvatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+        "image": "https://tiimg.tistatic.com/fp/1/003/898/lab-coat-731.jpg"
+    }
+]

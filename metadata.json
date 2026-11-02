@@ -1,0 +1,6 @@
+{
+  "name": "MCKVIE Campus Bazaar",
+  "description": "Full-stack student marketplace for MCKVIE engineering college to buy, sell, and exchange lab coats, drafters, books, and electronics with real-time Firebase backend.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

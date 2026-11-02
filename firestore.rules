@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default Deny Catch-All
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global hardened helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'madhumatibarman2014@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isValidProduct(data) {
+      return data.title is string && data.title.size() >= 2 && data.title.size() <= 100 &&
+             data.category in ['Drawing Kit', 'Lab Coat', 'Notes', 'Electronics', 'Other'] &&
+             data.price is number && data.price >= 0 && data.price <= 1000000 &&
+             data.desc is string && data.desc.size() >= 2 && data.desc.size() <= 1000 &&
+             data.location is string && data.location.size() >= 1 && data.location.size() <= 100 &&
+             data.contact is string && data.contact.size() == 10 && data.contact.matches('^[0-9]{10}$') &&
+             data.imageUrl is string && data.imageUrl.size() <= 500000 &&
+             data.ownerId is string && data.ownerId.size() <= 128 &&
+             data.ownerEmail is string && data.ownerEmail.size() <= 128;
+    }
+
+    function isValidUserProfile(data) {
+      return data.uid is string && data.uid.size() <= 128 && data.uid == request.auth.uid &&
+             data.email is string && data.email.size() <= 128;
+    }
+
+    // Connection test doc (used by testConnection() at startup)
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Products Collection
+    match /products/{productId} {
+      allow get, list: if true;
+
+      allow create: if isSignedIn() &&
+                       isValidId(productId) &&
+                       isValidProduct(incoming()) &&
+                       incoming().ownerId == request.auth.uid &&
+                       incoming().keys().hasOnly([
+                         'title', 'category', 'price', 'desc', 'location', 'contact',
+                         'imageUrl', 'ownerId', 'ownerEmail', 'ownerName', 'ownerAvatar',
+                         'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasAll([
+                         'title', 'category', 'price', 'desc', 'location', 'contact',
+                         'imageUrl', 'ownerId', 'ownerEmail', 'createdAt'
+                       ]);
+
+      allow update: if isSignedIn() &&
+                       isValidId(productId) &&
+                       (existing().ownerId == request.auth.uid || isAdmin()) &&
+                       isValidProduct(incoming()) &&
+                       incoming().ownerId == existing().ownerId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly([
+                         'title', 'category', 'price', 'desc', 'location', 'contact',
+                         'imageUrl', 'ownerName', 'ownerAvatar', 'updatedAt'
+                       ]);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(productId) &&
+                       (existing().ownerId == request.auth.uid || isAdmin());
+    }
+
+    // User Profile Collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isSignedIn() && request.auth.uid == userId;
+
+      allow create, update: if isSignedIn() &&
+                               isValidId(userId) &&
+                               request.auth.uid == userId &&
+                               isValidUserProfile(incoming()) &&
+                               incoming().keys().hasOnly(['uid', 'email', 'displayName', 'photoURL', 'createdAt', 'updatedAt']);
+
+      // Private Wishlist Subcollection
+      match /wishlist/{productId} {
+        allow read, write: if isSignedIn() &&
+                              isValidId(userId) &&
+                              request.auth.uid == userId &&
+                              isValidId(productId);
+      }
+    }
+  }
+}

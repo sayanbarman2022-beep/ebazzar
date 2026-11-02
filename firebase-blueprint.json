@@ -1,0 +1,162 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A marketplace item listed for sale by a student at MCKVIE",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Product title"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["Drawing Kit", "Lab Coat", "Notes", "Electronics", "Other"],
+          "description": "Category of college gear"
+        },
+        "price": {
+          "type": "number",
+          "description": "Price in INR"
+        },
+        "desc": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 1000,
+          "description": "Condition, specifications, and details"
+        },
+        "location": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Designated MCKVIE campus handover point"
+        },
+        "contact": {
+          "type": "string",
+          "pattern": "^[0-9]{10}$",
+          "maxLength": 10,
+          "description": "10-digit WhatsApp/mobile number"
+        },
+        "imageUrl": {
+          "type": "string",
+          "maxLength": 500000,
+          "description": "Product photo URL or data URI"
+        },
+        "ownerId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Firebase Auth UID of the seller"
+        },
+        "ownerEmail": {
+          "type": "string",
+          "maxLength": 128,
+          "format": "email",
+          "description": "Email address of the seller"
+        },
+        "ownerName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Display name of the seller"
+        },
+        "ownerAvatar": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Avatar photo URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": [
+        "title",
+        "category",
+        "price",
+        "desc",
+        "location",
+        "contact",
+        "imageUrl",
+        "ownerId",
+        "ownerEmail",
+        "createdAt"
+      ]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Student profile metadata and preferences",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "Firebase Auth UID"
+        },
+        "email": {
+          "type": "string",
+          "maxLength": 128,
+          "format": "email",
+          "description": "Student email address"
+        },
+        "displayName": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Student full name or alias"
+        },
+        "photoURL": {
+          "type": "string",
+          "maxLength": 1000,
+          "description": "Profile picture URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Account registration timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Profile update timestamp"
+        }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "WishlistItem": {
+      "title": "WishlistItem",
+      "description": "Saved product reference in user's personal wishlist",
+      "type": "object",
+      "properties": {
+        "productId": {
+          "type": "string",
+          "maxLength": 128,
+          "description": "ID of favorited product"
+        },
+        "addedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when added to wishlist"
+        }
+      },
+      "required": ["productId", "addedAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Public collection of college gear and essentials listed by students"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Private student user profile documents"
+    },
+    "/users/{userId}/wishlist/{productId}": {
+      "schema": "WishlistItem",
+      "description": "Private subcollection for student favorited items"
+    }
+  }
+}
